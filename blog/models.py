@@ -1,15 +1,44 @@
 from django.db import models
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
-    def __str__(self): return self.name
+    title = models.CharField(max_length=225)
+
+    class Meta:
+        ordering = ('title',)
+        verbose_name_plural = 'Categories'
+
+    def __str__(self):
+        return self.title
+
 
 class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
-    def __str__(self): return self.title
+    ACTIVE = 'active'
+    DRAFT = 'draft'
+
+    CHOICES_STATUS = (
+        (ACTIVE, 'Active'),
+        (DRAFT, 'Draft'),
+    )
+
+    category = models.ForeignKey(Category, related_name='post', on_delete=models.CASCADE)
+    title = models.CharField(max_length=225)
+    intro = models.TextField()
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=CHOICES_STATUS, default=ACTIVE)
+    image = models.ImageField(upload_to='upload/', blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    text = models.TextField()
+    post = models.ForeignKey(Post, related_name='comments', on_delete=models.CASCADE)
+    name = models.CharField(max_length=225)
+    email = models.EmailField()
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
